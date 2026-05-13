@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Dive into Harness Engineering in AI Coding</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --light-text: #64748b;
+            --border-color: #e2e8f0;
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+        }
+
+        nav {
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        nav h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav ul li a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            display: block;
+            transition: all 0.2s ease;
+        }
+
+        nav ul li a:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+        }
+
+        nav ul li ul {
+            padding-left: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        nav ul li ul li a {
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+
+        main {
+            background: white;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 1.6rem;
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h3 {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-color);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        blockquote {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(30, 64, 175, 0.05) 100%);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--light-text);
+        }
+
+        code {
+            background-color: rgba(30, 41, 59, 0.05);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: #dc2626;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85rem;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.8rem 1rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: rgba(37, 99, 235, 0.08);
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .reference-section {
+            background-color: rgba(30, 41, 59, 0.03);
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .reference-section h3 {
+            margin-top: 0;
+        }
+
+        .reference-section ul {
+            columns: 2;
+            column-gap: 1rem;
+        }
+
+        .reference-section li {
+            break-inside: avoid;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            main {
+                padding: 1.5rem;
+            }
+
+            nav {
+                position: static;
+            }
+
+            .reference-section ul {
+                columns: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Deep Dive into Harness Engineering in AI Coding</h1>
+        <p>Paradigm Shift, Practices, and System Design</p>
+    </header>
+
+    <div class="container">
+        <nav>
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#intro">1. Introduction</a></li>
+                <li><a href="#definition">2. Definition & Principles</a>
+                    <ul>
+                        <li><a href="#core-def">2.1 Core Definition</a></li>
+                        <li><a href="#boundaries">2.2 Boundaries</a></li>
+                        <li><a href="#principles">2.3 Core Principles</a></li>
+                    </ul>
+                </li>
+                <li><a href="#practice">3. Code Generation Phase</a></li>
+                <li><a href="#enterprise">4. Enterprise-Grade Design</a></li>
+                <li><a href="#individual">5. Individual Developers</a></li>
+                <li><a href="#cases">6. Case Studies</a></li>
+                <li><a href="#challenges">7. Challenges & Trends</a></li>
+                <li><a href="#conclusion">8. Conclusion</a></li>
+                <li><a href="#references">References</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <h2 id="intro">1. Introduction: The Paradigm Shift in AI-Driven Software Engineering</h2>
+            <p>AI coding has evolved from a niche productivity tool to a core pillar of modern software development—but its enterprise-scale adoption has long been hindered by three fundamental gaps that even the most advanced models cannot solve alone. By 2026, leading models including GPT-4.5, Claude 3.5, and Gemini 2.0 had converged to within 3% accuracy on standard coding benchmarks, yet their output consistency remained volatile: identical prompts could yield code with compliance rates swinging by up to 40%. For long-duration tasks exceeding 3 hours—such as building a payment processing module or integrating a legacy database—autonomous completion rates plummeted to less than 20%, a threshold so low that AI could not be trusted to deliver end-to-end value. Most critically, security and compliance risks loomed large: in financial services, AI-generated code was found to carry a 3.7x higher risk of sensitive data leakage than code written by human engineers.</p>
+
+            <p>These challenges are not failures of model capability—they are failures of engineering discipline. Early AI coding strategies focused on optimizing inputs: Prompt Engineering (2022–2024) taught teams to craft precise queries to minimize hallucinations, while Context Engineering (2024–2025) built systems to inject relevant codebase knowledge into model windows. But both approaches treated AI as a black box, offering no way to control the <em>process</em> of code generation—only the starting conditions. The breakthrough came in late 2025, when HashiCorp co-founder Mitchell Hashimoto first articulated the core logic of Harness Engineering: <em>"Every time an agent makes a mistake, fix the problem permanently with engineering, not prompts"</em>. This philosophy shifted the focus from "getting the model to write better code" to "building systems that make it impossible for the model to write bad code."</p>
+
+            <blockquote>
+                "Every time an agent makes a mistake, fix the problem permanently with engineering, not prompts" — Mitchell Hashimoto
+            </blockquote>
+
+            <p>The paradigm was formalized in February 2026, when OpenAI published its landmark blog post <em>Harness Engineering: Leveraging Codex in an Agent-First World</em>. The post introduced a radical redefinition of software engineering: teams no longer write code—they design environments, specify intent, and build automated feedback loops that enable AI agents to work reliably. This report draws on 2025–2026 industry practice and case studies from leading organizations to systematically explain Harness Engineering's definition, implementation in code generation, and architecture design for both enterprise and individual developers.</p>
+
+            <h2 id="definition">2. Definition and Core Principles of Harness Engineering</h2>
+
+            <h3 id="core-def">2.1 Core Definition</h3>
+            <p>Harness Engineering is an <strong>agent-first</strong> software engineering paradigm centered on the principle of <em>"Humans steer, agents execute"</em>. OpenAI's official definition frames it as a fundamental shift in team responsibility: instead of writing code manually, engineers design the operating environment, clarify task intent, and build automated feedback loops and constraint systems that enable AI agents like Codex to autonomously and reliably build and maintain large-scale software systems.</p>
+
+            <p>At its core, this paradigm reorients software engineering from controlling <em>human output</em> to governing <em>AI execution</em>. In traditional engineering, human developers write code, and processes like code review or unit testing serve as post-hoc validation. In Harness Engineering, AI generates the vast majority of code, and the harness acts as a mandatory control framework—turning human engineers from "coders" into "designers of AI behavior."</p>
+
+            <p>The term "harness" is deliberate: just as a horse's harness guides powerful but unruly animals toward a target, a software harness provides guardrails, execution frameworks, and feedback mechanisms that channel an AI's capabilities without stifling them. It is not a tool or a library—it is a comprehensive system that makes AI reliability scalable.</p>
+
+            <h3 id="boundaries">2.2 Boundaries with Traditional Engineering and Other AI Paradigms</h3>
+
+            <h4>2.2.1 Relationship to Test Harness</h4>
+            <p>The concept of "harness" has deep roots in software engineering, dating back to the IEEE 829 standard (1983) that defined the <em>Test Harness</em> as a structured environment for validating human-written code. But Harness Engineering represents a quantum leap from this legacy: it has evolved from a <em>test support tool</em> to a <em>full-stack AI control system</em>.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dimension</th>
+                        <th>Test Harness</th>
+                        <th>Harness Engineering</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Goal</strong></td>
+                        <td>Validate correctness of human-written code</td>
+                        <td>Govern the full lifecycle of AI agent execution to ensure consistency and compliance</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interaction Model</strong></td>
+                        <td>Static input → passive execution → one-time validation</td>
+                        <td>Dynamic context → autonomous decision-making → continuous iterative feedback</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Lifecycle</strong></td>
+                        <td>Ephemeral (destroyed after test runs)</td>
+                        <td>Long-running (supports multi-hour tasks with checkpoint recovery)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Core Components</strong></td>
+                        <td>Test Runner, Fixtures, Assertions</td>
+                        <td>Constraint systems, tool integration layers, persistent state management, orchestration engines</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>As the Tencent Cloud Developer Community notes: <em>"A Test Harness builds a scaffold for testing human code; Harness Engineering builds an 'operating system' for AI. The former serves to validate results, the latter to control processes."</em></p>
+
+            <h4>2.2.2 Hierarchy with Prompt and Context Engineering</h4>
+            <p>Harness Engineering does not replace Prompt or Context Engineering—it <em>enables</em> them. Together, they form a nested, progressive architecture that addresses distinct layers of AI coding challenges:</p>
+
+            <ul>
+                <li><strong>Prompt Engineering (2022–2024)</strong> solves the problem of <em>how to ask precisely</em>: it uses techniques like chain-of-thought prompting to improve the quality of a single AI output. But it only optimizes the input layer—even a perfect prompt cannot prevent an AI from drifting away from requirements mid-task.</li>
+                <li><strong>Context Engineering (2024–2025)</strong> solves the problem of <em>how to provide effective reference information</em>: it uses retrieval-augmented generation (RAG) and context compression to inject relevant codebase knowledge into the model's window. But it still operates at the input layer, with no way to intervene in the AI's execution.</li>
+                <li><strong>Harness Engineering (2025–present)</strong> solves the problem of <em>how to make AI complete complex tasks consistently</em>: it provides the runtime guardrails that turn probabilistic AI output into deterministic results. Without a harness, even the most optimized prompts and context will be undermined by the AI's inherent randomness.</li>
+            </ul>
+
+            <blockquote>
+                "If AI coding were a car race, Prompt Engineering is the driver's instructions, Context Engineering is the road signs, and Harness Engineering is the car's chassis, brakes, and navigation system—without it, even the clearest instructions and signs can't keep the car on the road." — Huawei Developer Alliance
+            </blockquote>
+
+            <h3 id="principles">2.3 Core Principles</h3>
+            <p>Harness Engineering's six foundational pillars address the exact pain points that limit AI coding scalability. Each pillar is battle-tested, derived from OpenAI's million-line code experiment and Stripe's Minions agent system—initiatives that delivered production-grade code with near-zero manual intervention:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pillar</th>
+                        <th>Core Logic</th>
+                        <th>Solved Pain Point</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Architecture-First Constraints</strong></td>
+                        <td>Enforce rigid rules for code layering, dependency direction, and file size—encoded in linters and CI checks—instead of relying on natural language prompts.</td>
+                        <td>Architectural drift: AI-generated code often develops circular dependencies or violates layer boundaries, making long-term maintenance impossible.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Automated Validation Loops</strong></td>
+                        <td>Mandate that AI runs tests after every code generation step, with results automatically injected into its context to drive self-fix.</td>
+                        <td>Inconsistent output: Identical prompts yield code with compliance rates swinging by up to 40%.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Structured Knowledge Delivery</strong></td>
+                        <td>Organize project documentation as a "navigation map" (e.g., <code>AGENTS.md</code>) instead of an encyclopedia, with progressive disclosure to avoid context overload.</td>
+                        <td>Long-duration task failure: AI loses track of requirements in tasks exceeding 3 hours, with autonomous completion rates below 20%.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Least Privilege Principle</strong></td>
+                        <td>Grant AI agents only the permissions required for the current subtask—e.g., read access to a specific directory or limited tool invocation rights.</td>
+                        <td>Security risks: AI-generated code in financial services has a 3.7x higher risk of sensitive data leakage.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Persistent State Management</strong></td>
+                        <td>Persist task progress and context to the filesystem (not just the model's short-term memory) with checkpoints for recovery.</td>
+                        <td>Amnesia in long tasks: AI forgets prior steps in multi-hour work, leading to incomplete or contradictory code.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Continuous Evolution</strong></td>
+                        <td>Learn from AI mistakes to dynamically update constraint rules and tool capabilities—turning every error into a permanent system improvement.</td>
+                        <td>Stagnation: AI systems fail to adapt to new model versions or evolving business requirements.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>These pillars operate as a closed loop: constraints define boundaries, knowledge provides guidance, least privilege mitigates risk, persistent state enables long tasks, validation ensures quality, and continuous evolution makes the system self-improving.</p>
+
+            <h2 id="practice">3. Harness Engineering in Practice: Code Generation Phase</h2>
+            <p>The code generation phase is where Harness Engineering delivers its most tangible value—turning the AI's probabilistic output into deterministic, production-ready code. It relies on four interconnected mechanisms: standardized input, structured execution, output parsing, and closed-loop feedback.</p>
+
+            <h3>3.1 Standardized Input: Intent Alignment and Environment Preparation</h3>
+            <p>The first step to reliable AI code generation is eliminating ambiguity. Standardized input ensures the AI understands <em>exactly</em> what to build, what constraints to follow, and what tools it can use—before it writes a single line of code.</p>
+
+            <h4>3.1.1 Intent Alignment: From Natural Language to Structured Contracts</h4>
+            <p>Traditional natural language prompts are inherently ambiguous: a request to "build a user login API" might yield code that skips input validation or uses an unsupported authentication method. Harness Engineering solves this with three structured mechanisms:</p>
+
+            <ul>
+                <li><strong>Structured Intent Carriers</strong>: The <code>AGENTS.md</code> file acts as the single source of truth for AI intent. Unlike traditional documentation, it is a "navigation map"—not an encyclopedia—limited to 50–100 lines of core constraints and reference links.</li>
+                <li><strong>Contract-First Principle</strong>: All requirements must be defined in machine-readable contracts—such as OpenAPI schemas or Protobuf—<em>before</em> the AI writes code.</li>
+                <li><strong>Versioned Knowledge Management</strong>: A dedicated "doc-gardening" agent maintains all project documentation in version control, scanning for outdated content and automatically opening pull requests to fix discrepancies.</li>
+            </ul>
+
+            <h4>3.1.2 Environment Preparation: Context Injection and Sandbox Isolation</h4>
+            <p>Even with clear intent, AI cannot generate reliable code without a controlled execution environment. Harness Engineering prepares this environment with two key steps:</p>
+
+            <ul>
+                <li><strong>Automated Context Injection</strong>: Middleware like <code>LocalContextMiddleware</code> automatically injects three critical pieces of information when an agent starts: the current directory structure, a list of installed tools, and time/quality budgets.</li>
+                <li><strong>Secure Sandbox Isolation</strong>: All AI-generated code runs in an isolated environment—containerized sandboxes (e.g., gVisor) for enterprises, or process-level sandboxes for individual developers.</li>
+            </ul>
+
+            <h3>3.2 Structured Execution: Task Decomposition and Workflow Orchestration</h3>
+            <p>Complex tasks—such as building a payment processing system—are beyond the AI's ability to handle in one go. Structured execution breaks these tasks into manageable units and orchestrates them through a repeatable loop.</p>
+
+            <h4>3.2.1 Task Decomposition: Divide and Conquer</h4>
+            <p>For tasks requiring more than 1000 lines of code, the AI's autonomous completion rate drops below 20%. Harness Engineering solves this with a "divide and conquer" strategy:</p>
+
+            <ul>
+                <li><strong>Hierarchical Decomposition</strong>: Tasks are split into three layers—requirements → subtasks → code blocks—with each code block limited to 50–200 lines.</li>
+                <li><strong>Priority Scheduling</strong>: Subtasks are ordered by "high value, low risk"—e.g., building a core user authentication API before a non-critical admin dashboard.</li>
+            </ul>
+
+            <h4>3.2.2 Workflow Orchestration: The Plan-Build-Verify-Fix Loop</h4>
+            <p>This is the heart of Harness Engineering's code generation practice—an automated PDCA (Plan-Do-Check-Act) cycle that ensures every line of AI-generated code meets production standards:</p>
+
+            <ol>
+                <li><strong>Plan</strong>: The AI analyzes the subtask and creates an execution plan that is submitted to the control plane for approval.</li>
+                <li><strong>Build</strong>: The AI generates code incrementally—only modifying or adding the necessary lines—instead of rewriting entire files.</li>
+                <li><strong>Verify</strong>: Three layers of automated checks: syntax/style checks, unit test coverage checks, and architecture constraint checks.</li>
+                <li><strong>Fix</strong>: If any check fails, the error log is automatically injected into the AI's context, and it regenerates the code.</li>
+            </ol>
+
+            <h3>3.3 Output Parsing and Quality Gates: From Probabilistic to Deterministic</h3>
+            <p>AI output is inherently unstructured—even with clear prompts, it may include extraneous text or formatting errors. Harness Engineering solves this with standardized protocols and mandatory quality gates.</p>
+
+            <h4>3.3.1 Structured Output Protocols</h4>
+            <p>To eliminate unstructured output, Harness Engineering uses standardized protocols like the Hashline Protocol:</p>
+
+            <ul>
+                <li><strong>Content-Addressable Lines</strong>: Every line of code is prefixed with a hash tag generated from the line's content.</li>
+                <li><strong>Write Validation</strong>: When the AI modifies a line, it must reference the corresponding hash tag.</li>
+            </ul>
+
+            <h4>3.3.2 Quality Gates: Mandatory Checkpoints</h4>
+            <p>Quality gates are non-negotiable checkpoints that code must pass to move to the next phase:</p>
+
+            <ul>
+                <li><strong>Architecture Compliance</strong>: Service-layer code cannot call controller-layer code.</li>
+                <li><strong>Test Coverage</strong>: Unit test coverage must be ≥80%.</li>
+                <li><strong>Sensitive Data Detection</strong>: No hard-coded secrets or API keys.</li>
+            </ul>
+
+            <h3>3.4 Feedback Loops: Learning from AI Mistakes</h3>
+            <p>The final step in the code generation phase is turning every AI mistake into a permanent system improvement.</p>
+
+            <ul>
+                <li><strong>Structured Error Injection</strong>: When code fails a check, the system converts the error log into a structured prompt that is injected into the AI's context.</li>
+                <li><strong>Dynamic Constraint Updates</strong>: Every error identified by the feedback loop becomes a new constraint rule.</li>
+                <li><strong>Prompt Optimization</strong>: The system tracks the effectiveness of prompts and refines them over time.</li>
+            </ul>
+
+            <h2 id="enterprise">4. Designing a Harness-Based AI Coding System: Enterprise-Grade</h2>
+            <p>Enterprise-grade AI coding systems require <strong>observability, maintainability, and security compliance</strong>—requirements that demand a robust, layered architecture.</p>
+
+            <h3>4.1 Overall Architecture: Three-Layer Standardized System</h3>
+            <p>The enterprise harness architecture follows a three-layer design—<em>Orchestration, Knowledge, and Runtime</em>—that aligns with the structure of modern operating systems.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Layer</th>
+                        <th>Core Responsibility</th>
+                        <th>Key Components</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Orchestration Layer</strong></td>
+                        <td>The "brain" of the system: responsible for task scheduling, workflow control, and state management.</td>
+                        <td>Orchestration engine, state manager, quality gate controller</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Knowledge Layer</strong></td>
+                        <td>The "knowledge base": responsible for storing, retrieving, and maintaining structured project information.</td>
+                        <td>Structured document library, vector database, doc-gardening agent</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Runtime Layer</strong></td>
+                        <td>The "hands and feet": responsible for AI execution, tool integration, and security isolation.</td>
+                        <td>Sandbox execution environment, tool integration layer, permission controller</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>4.2 Key Module Design</h3>
+            <h4>4.2.1 Orchestration Layer: Workflow Engine and Task Scheduling</h4>
+            <ul>
+                <li><strong>DSL Rule Library</strong>: A domain-specific language defines task execution flows and constraints.</li>
+                <li><strong>Checkpoint Recovery</strong>: After every step, the system persists the current task state to a distributed storage system.</li>
+                <li><strong>Inference Pooling</strong>: The system pools model inference requests to optimize resource usage.</li>
+            </ul>
+
+            <h4>4.2.2 Agent Layer: Model Routing and Tool Integration</h4>
+            <ul>
+                <li><strong>MCP Protocol Adaptation</strong>: The Model Context Protocol provides a standardized interface for tool invocation.</li>
+                <li><strong>Multi-Model Routing</strong>: The system routes tasks to the most cost-effective and capable model.</li>
+                <li><strong>Tool Permission Control</strong>: The system enforces the least privilege principle with a four-layer mechanism.</li>
+            </ul>
+
+            <h4>4.2.3 Artifact Layer: Test Bed and Knowledge Management</h4>
+            <ul>
+                <li><strong>Test Bed as a Service</strong>: The system provides temporary, isolated test environments for the AI to run tests.</li>
+                <li><strong>Vector Database</strong>: A vector database stores structured knowledge for semantic retrieval.</li>
+                <li><strong>Doc-Gardening Agent</strong>: This dedicated agent scans documentation for consistency with code.</li>
+            </ul>
+
+            <h3>4.3 Security and Compliance: Non-Negotiable for Enterprises</h3>
+            <h4>4.3.1 Full-Lifecycle Security Protection</h4>
+            <ul>
+                <li><strong>Input Desensitization</strong>: The system automatically filters sensitive information from user inputs.</li>
+                <li><strong>Transport Encryption</strong>: All data in transit is encrypted with TLS 1.3.</li>
+                <li><strong>Sandbox Isolation</strong>: AI-generated code runs in a sandbox with no network access or write permissions to sensitive directories.</li>
+                <li><strong>Output Filtering</strong>: The system scans AI-generated code for sensitive information and security vulnerabilities.</li>
+            </ul>
+
+            <h4>4.3.2 Compliance Auditing: Full Traceability</h4>
+            <ul>
+                <li><strong>trace_id Injection</strong>: Every AI coding request gets a unique <code>trace_id</code> that is injected into code comments, test reports, and pull request descriptions.</li>
+                <li><strong>OpenAudit API</strong>: A standardized RESTful API provides audit queries.</li>
+                <li><strong>Audit Log Persistence</strong>: All audit logs are encrypted and stored in an internal database for at least 6 months.</li>
+            </ul>
+
+            <h2 id="individual">5. Designing a Harness-Based AI Coding System: Individual Developers</h2>
+            <p>Individual developers have different priorities than enterprises: <strong>low cost, lightweight, and fast iteration</strong>.</p>
+
+            <h3>5.1 Design Principles</h3>
+            <ul>
+                <li><strong>Minimal Configuration</strong>: The system requires no complex deployment or setup—just a simple configuration file.</li>
+                <li><strong>Cost Control</strong>: The system uses caching, context compression, and model switching to minimize API costs.</li>
+                <li><strong>IDE-Native Integration</strong>: The system integrates seamlessly with popular IDEs like VS Code, Cursor, and JetBrains.</li>
+            </ul>
+
+            <h3>5.2 Typical Architecture: Lightweight Execution Framework</h3>
+            <ul>
+                <li><strong>Context Manager</strong>: Manages the AI's context with context compression to reduce token consumption.</li>
+                <li><strong>Tool Invocation Layer</strong>: Supports common tools with no complex permission configuration.</li>
+                <li><strong>Model Switcher</strong>: Switches between models based on task complexity and cost.</li>
+            </ul>
+
+            <h3>5.3 Key Module Design</h3>
+            <h4>5.3.1 Context Management: Memory Optimization and Summary Compression</h4>
+            <ul>
+                <li><strong>MEMORY.md Mechanism</strong>: The core context is stored in a <code>MEMORY.md</code> file limited to 80 lines.</li>
+                <li><strong>Automatic Summary Compression</strong>: The system automatically summarizes historical conversations every 10 rounds.</li>
+                <li><strong>Lazy Loading</strong>: The system loads context information only when the AI needs it.</li>
+            </ul>
+
+            <h4>5.3.2 Cost Control: Token Budget and Model Degradation</h4>
+            <ul>
+                <li><strong>Token Budget Setting</strong>: Developers can set daily or monthly token budgets.</li>
+                <li><strong>Automatic Model Degradation</strong>: When the primary model's token consumption reaches the budget threshold, the system switches to a cheaper model.</li>
+                <li><strong>Script Execution Caching</strong>: The system caches the results of script executions for 24 hours.</li>
+            </ul>
+
+            <h4>5.3.3 Error Handling: Simplified Feedback Mechanism</h4>
+            <ul>
+                <li><strong>Error Log Highlighting</strong>: The IDE highlights error lines in AI-generated code and provides clear error reasons and fix suggestions.</li>
+                <li><strong>One-Click Fix</strong>: The system provides a one-click fix button for common errors.</li>
+                <li><strong>Community Rule Library</strong>: A community-shared library of constraint rules allows developers to import pre-built rules.</li>
+            </ul>
+
+            <h2 id="cases">6. Case Studies</h2>
+
+            <h3>6.1 OpenAI: The Million-Line Code Experiment</h3>
+            <p><strong>Background</strong>: In August 2025, OpenAI launched an ambitious experiment to test the limits of Harness Engineering: build a complete, production-ready product with <em>zero manually written code</em>.</p>
+
+            <p><strong>Harness Design</strong>:</p>
+            <ul>
+                <li>Structured Knowledge System using <code>AGENTS.md</code> as a "navigation map"</li>
+                <li>Plan-Build-Verify-Fix Loop with automated feedback</li>
+                <li>Git as a safety net for tracing progress</li>
+            </ul>
+
+            <p><strong>Results</strong>:</p>
+            <ul>
+                <li>Built ~1 million lines of production code in five months</li>
+                <li>Code compliance rate reached 94%</li>
+                <li>Human intervention required for only 8.2% of tasks</li>
+            </ul>
+
+            <h3>6.2 Stripe: The Minions Autonomous Coding System</h3>
+            <p><strong>Background</strong>: Stripe processes over $1 trillion in annual payment volume—requiring code that is both secure and reliable.</p>
+
+            <p><strong>Harness Design</strong>:</p>
+            <ul>
+                <li>Blueprint Orchestration using state machines</li>
+                <li>Isolated Devboxes for each Minion</li>
+                <li>Toolshed with ~500 standardized tools</li>
+            </ul>
+
+            <p><strong>Results</strong>:</p>
+            <ul>
+                <li>Minions merge over 1,300 pull requests per week</li>
+                <li>Code review pass rate increased by 70%</li>
+                <li>Reduced engineering team size by 30% while increasing output by 700%</li>
+            </ul>
+
+            <h3>6.3 Individual Developer: OpenHarness + Qwen Code</h3>
+            <p><strong>Background</strong>: An individual developer wanted to build a simple blog system with limited time (3 days) and a tight budget.</p>
+
+            <p><strong>Harness Design</strong>:</p>
+            <ul>
+                <li>OpenHarness: lightweight harness with 11.7k lines of code</li>
+                <li>Qwen Code: open-source model with 2000 free daily invocations</li>
+                <li><code>MEMORY.md</code> with core requirements limited to 80 lines</li>
+            </ul>
+
+            <p><strong>Results</strong>:</p>
+            <ul>
+                <li>Completed the blog system in 3 days—5x faster than traditional manual coding</li>
+                <li>API costs were nearly zero</li>
+                <li>Code passed all Pylint checks with 80% unit test coverage</li>
+            </ul>
+
+            <h2 id="challenges">7. Challenges and Future Trends</h2>
+
+            <h3>7.1 Challenges</h3>
+            <ol>
+                <li><strong>High Initial Development Cost</strong>: Building an enterprise-grade harness requires significant engineering effort—typically 20–50 person-months and $200k–$500k in costs.</li>
+                <li><strong>Error Amplification</strong>: A single flaw in the harness's constraint rules can lead to large-scale errors.</li>
+                <li><strong>Model Compatibility</strong>: Harness systems are often tightly coupled to specific model versions.</li>
+                <li><strong>Technical Barrier for Individuals</strong>: Individual developers often lack the engineering expertise to design and implement a harness system.</li>
+            </ol>
+
+            <h3>7.2 Future Trends</h3>
+            <ol>
+                <li><strong>Low-Code/No-Code Harness Platforms</strong>: Visual, drag-and-drop interfaces will allow teams to build harness systems without writing code.</li>
+                <li><strong>Self-Healing Harnesses</strong>: Harness systems will gain the ability to detect and fix their own flaws.</li>
+                <li><strong>Standardization and Cross-Model Compatibility</strong>: Industry-wide standards will enable harness systems to work with any AI model.</li>
+                <li><strong>Agentic Harnesses</strong>: Harness systems will be managed by AI agents themselves.</li>
+            </ol>
+
+            <h2 id="conclusion">8. Conclusion</h2>
+            <p>Harness Engineering represents a paradigm shift in software development—moving from "human-written code" to "AI-executed code with human-designed guardrails." It is not a rejection of AI's capabilities—it is the engineering discipline that makes those capabilities scalable and reliable.</p>
+
+            <p>This report's key conclusions are:</p>
+
+            <ol>
+                <li><strong>Paradigm Shift</strong>: The core of software engineering has shifted from writing code to designing AI execution environments.</li>
+                <li><strong>Architecture Hierarchy</strong>: Enterprise systems require a three-layer architecture for strong control and compliance. Individual developers need lightweight, IDE-integrated systems.</li>
+                <li><strong>Implementation Path</strong>: Standardized input, structured execution, automated validation, and closed-loop feedback are the core steps.</li>
+                <li><strong>Competitive Barrier</strong>: The future of AI coding competition will not be about model capabilities—it will be about harness systems.</li>
+            </ol>
+
+            <p>For enterprises looking to adopt Harness Engineering, we recommend a three-phase approach:</p>
+
+            <ol>
+                <li><strong>Pilot Phase</strong>: Start with a low-risk scenario to build a minimal viable harness.</li>
+                <li><strong>Promotion Phase</strong>: Expand the harness to core business scenarios.</li>
+                <li><strong>Optimization Phase</strong>: Continuously iterate on the harness system.</li>
+            </ol>
+
+            <p>Harness Engineering is not the future of AI coding—it is the present. To stay competitive in the AI-driven software landscape, every engineering team must learn to build and use harness systems.</p>
+
+            <div class="reference-section">
+                <h3 id="references">参考资料</h3>
+                <ul>
+                    <li>[1] Stripe Minions: One-Shot, End-to-End Coding Agents</li>
+                    <li>[2] How Stripe built "minions"—AI coding agents that ship 1,300 PRs weekly</li>
+                    <li>[3] Stripe's coding agents: the walls matter more than the model</li>
+                    <li>[4] Stripe's AI 'Minions' Now Ship 1,300 Pull Requests Per Week</li>
+                    <li>[5] Harness engineering: Structured workflows for AI-assisted development</li>
+                    <li>[6] How to Harness Coding Agents with the Right Infrastructure</li>
+                    <li>[7] Harness Engineering: The Critical System That Makes AI Coding Actually Work</li>
+                    <li>[8] OpenAI Introduces Harness Engineering: Codex Agents Power Large-Scale Software Development</li>
+                    <li>[9] Harness Engineering: Leveraging Codex in an Agent-First World</li>
+                    <li>[10] Zero-Gap API Development: A Contract-First Framework</li>
+                    <li>[11] What is a test harness in software testing?</li>
+                    <li>[12] Best AI Model for Coding in 2026</li>
+                    <li>[13] What is a quality gate?</li>
+                    <li>[14] The Agent Loop Is the New OS</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
