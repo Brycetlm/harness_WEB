@@ -1,9 +1,6 @@
 {
   "version": 2,
   "public": false,
-  "analytics": {
-    "enable": true
-  },
   "headers": [
     {
       "source": "/(.*)",
